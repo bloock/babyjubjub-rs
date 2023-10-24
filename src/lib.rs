@@ -3,15 +3,15 @@
 
 use ff::*;
 
-use poseidon_rs::Poseidon;
-pub type Fr = poseidon_rs::Fr; // alias
+use bloock_poseidon_rs::POSEIDON;
+pub type Fr = bloock_poseidon_rs::poseidon::Fr; // alias
 
 use arrayref::array_ref;
 
-#[cfg(not(feature = "aarch64"))]
+#[cfg(not(target_arch = "aarch64"))]
 use blake_hash::Digest; // compatible version with Blake used at circomlib
 
-#[cfg(feature = "aarch64")]
+#[cfg(target_arch = "aarch64")]
 extern crate blake; // compatible version with Blake used at circomlib
 
 use std::cmp::min;
@@ -56,7 +56,6 @@ lazy_static! {
     )
         .unwrap()
         >> 3;
-    static ref POSEIDON: poseidon_rs::Poseidon = Poseidon::new();
 }
 
 #[derive(Clone, Debug)]
@@ -223,13 +222,13 @@ pub fn decompress_point(bb: [u8; 32]) -> Result<Point, String> {
     Ok(Point { x: x_fr, y: y_fr })
 }
 
-#[cfg(not(feature = "aarch64"))]
+#[cfg(not(target_arch = "aarch64"))]
 fn blh(b: &[u8]) -> Vec<u8> {
     let hash = blake_hash::Blake512::digest(b);
     hash.to_vec()
 }
 
-#[cfg(feature = "aarch64")]
+#[cfg(target_arch = "aarch64")]
 fn blh(b: &[u8]) -> Vec<u8> {
     let mut hash = [0; 64];
     blake::hash(512, b, &mut hash).unwrap();
@@ -330,10 +329,10 @@ impl PrivateKey {
         let a = &self.public();
 
         let hm_input = vec![r_b8.x, r_b8.y, a.x, a.y, msg_fr];
-        let hm = POSEIDON.hash(hm_input)?;
+        let hm = POSEIDON.hash(&hm_input)?;
 
         let mut s = &self.scalar_key() << 3;
-        let hm_b = BigInt::parse_bytes(to_hex(&hm).as_bytes(), 16).unwrap();
+        let hm_b = BigInt::parse_bytes(hm.hex().as_bytes(), 16).unwrap();
         s = hm_b * s;
         s = r + s;
         s %= &SUBORDER.clone();
@@ -367,8 +366,8 @@ pub fn schnorr_hash(pk: &Point, msg: BigInt, c: &Point) -> Result<BigInt, String
     }
     let msg_fr: Fr = Fr::from_str(&msg.to_string()).unwrap();
     let hm_input = vec![pk.x, pk.y, c.x, c.y, msg_fr];
-    let h = POSEIDON.hash(hm_input)?;
-    let h_b = BigInt::parse_bytes(to_hex(&h).as_bytes(), 16).unwrap();
+    let h = POSEIDON.hash(&hm_input)?;
+    let h_b = BigInt::parse_bytes(h.hex().as_bytes(), 16).unwrap();
     Ok(h_b)
 }
 
@@ -398,12 +397,12 @@ pub fn verify(pk: Point, sig: Signature, msg: BigInt) -> bool {
     }
     let msg_fr: Fr = Fr::from_str(&msg.to_string()).unwrap();
     let hm_input = vec![sig.r_b8.x, sig.r_b8.y, pk.x, pk.y, msg_fr];
-    let hm = match POSEIDON.hash(hm_input) {
+    let hm = match POSEIDON.hash(&hm_input) {
         Result::Err(_) => return false,
         Result::Ok(hm) => hm,
     };
     let l = B8.mul_scalar(&sig.s);
-    let hm_b = BigInt::parse_bytes(to_hex(&hm).as_bytes(), 16).unwrap();
+    let hm_b = BigInt::parse_bytes(hm.hex().as_bytes(), 16).unwrap();
     let r = sig
         .r_b8
         .projective()
