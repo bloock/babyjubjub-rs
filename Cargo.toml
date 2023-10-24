@@ -1,15 +1,12 @@
 [package]
-name = "babyjubjub-rs"
+name = "bloock-babyjubjub-rs"
 version = "0.0.10"
-authors = ["arnaucube <root@arnaucube.com>"]
+authors = ["arnaucube <root@arnaucube.com>", "Marc Baqué <marc@bloock.com>"]
 edition = "2021"
 license = "GPL-3.0"
 description = "BabyJubJub elliptic curve implementation"
-repository = "https://github.com/arnaucube/babyjubjub-rs"
+repository = "https://github.com/bloock/babyjubjub-rs"
 readme = "README.md"
-
-[lib]
-crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 ff = { package = "ff_ce", version = "0.13", features = ["derive"] }
@@ -25,6 +22,12 @@ bloock-poseidon-rs = "0.1.5"
 arrayref = "0.3.5"
 lazy_static = "1.4.0"
 
+[target.'cfg(not(target_arch = "aarch64"))'.dependencies]
+blake-hash = { version = "0.4.0" }
+
+[target.'cfg(target_arch = "aarch64")'.dependencies]
+blake = { version = "2.0.1" }
+
 [dev-dependencies]
 criterion = "0.3"
 hex = "0.4"
@@ -33,12 +36,6 @@ wasm-bindgen-test = "0.2"
 [[bench]]
 name = "bench_babyjubjub"
 harness = false
-
-[target.'cfg(not(target_arch = "aarch64"))'.dependencies]
-blake-hash = { version = "0.4.0" }
-
-[target.'cfg(target_arch = "aarch64")'.dependencies]
-blake = { version = "2.0.1" }
 
 [profile.dev]
 opt-level = 1
