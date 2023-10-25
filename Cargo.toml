@@ -21,17 +21,14 @@ generic-array = "0.14"
 bloock-poseidon-rs = "0.1.5"
 arrayref = "0.3.5"
 lazy_static = "1.4.0"
-
-[target.'cfg(not(target_arch = "aarch64"))'.dependencies]
-blake-hash = { version = "0.4.0" }
-
-[target.'cfg(target_arch = "aarch64")'.dependencies]
-blake = { version = "2.0.1" }
+bloock-blake-rs = "0.1.0"
 
 [dev-dependencies]
 criterion = "0.3"
 hex = "0.4"
-wasm-bindgen-test = "0.2"
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test = "0.3.32"
 
 [[bench]]
 name = "bench_babyjubjub"
