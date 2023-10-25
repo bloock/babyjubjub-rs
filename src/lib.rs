@@ -214,7 +214,7 @@ pub fn decompress_point(bb: [u8; 32]) -> Result<Point, String> {
 fn blh(b: &[u8]) -> Vec<u8> {
     let mut hasher = bloock_blake_rs::Blake512::default();
     hasher.write(b);
-    hasher.sum(&vec![])
+    hasher.sum(&[])
 }
 
 #[derive(Debug, Clone)]
