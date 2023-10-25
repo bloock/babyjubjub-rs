@@ -1,6 +1,6 @@
 [package]
 name = "bloock-babyjubjub-rs"
-version = "0.0.10"
+version = "0.0.11"
 authors = ["arnaucube <root@arnaucube.com>", "Marc Baqué <marc@bloock.com>"]
 edition = "2021"
 license = "GPL-3.0"
